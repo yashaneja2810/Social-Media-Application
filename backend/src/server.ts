@@ -28,11 +28,11 @@ const httpServer = createServer(app);
 // Allow both localhost and production frontend
 // Always include production URL to ensure CORS works even if env var isn't set
 const productionUrl = 'https://social-media-application-zeta.vercel.app';
-const allowedOrigins = process.env.NODE_ENV === 'production'
+const allowedOrigins: string[] = process.env.NODE_ENV === 'production'
   ? [
       productionUrl,
-      process.env.FRONTEND_URL // May be undefined, but that's ok
-    ].filter(Boolean) // Remove undefined values
+      ...(process.env.FRONTEND_URL && process.env.FRONTEND_URL !== productionUrl ? [process.env.FRONTEND_URL] : [])
+    ]
   : [
       'http://localhost:5173',
       'http://127.0.0.1:5173',
