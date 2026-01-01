@@ -25,7 +25,8 @@ dotenv.config();
 const app: Application = express();
 const httpServer = createServer(app);
 
-// CORS configuration - always allow production Vercel URL
+// TEMPORARY: Allow all origins to fix immediate CORS issue
+// TODO: Restrict to specific origins after confirming deployment works
 const productionUrl = 'https://social-media-application-zeta.vercel.app';
 const allowedOrigins: string[] = process.env.NODE_ENV === 'production'
   ? [productionUrl]
@@ -36,16 +37,20 @@ logger.info(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
 
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: '*', // Temporary fix - allow all origins for Socket.IO
     methods: ['GET', 'POST'],
     credentials: true,
   },
 });
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// TEMPORARY: Allow all origins
 app.use(cors({
-  origin: allowedOrigins,
+  origin: true, // Accept any origin temporarily
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
