@@ -26,16 +26,19 @@ const app: Application = express();
 const httpServer = createServer(app);
 
 // Allow both localhost and production frontend
+// Always include production URL to ensure CORS works even if env var isn't set
+const productionUrl = 'https://social-media-application-zeta.vercel.app';
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [
-      process.env.FRONTEND_URL || 'https://social-media-application-zeta.vercel.app',
-      'https://social-media-application-zeta.vercel.app' // Hardcoded fallback
-    ]
+      productionUrl,
+      process.env.FRONTEND_URL // May be undefined, but that's ok
+    ].filter(Boolean) // Remove undefined values
   : [
       'http://localhost:5173',
       'http://127.0.0.1:5173',
     ];
 
+logger.info(`Environment: NODE_ENV=${process.env.NODE_ENV}, FRONTEND_URL=${process.env.FRONTEND_URL}`);
 logger.info(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
 
 const io = new SocketIOServer(httpServer, {
