@@ -61,9 +61,15 @@ async function handleExistingSession(session) {
             authSection.style.display = 'block';
             chatSection.style.display = 'none';
             showAlert('info', 'Please enter your password to decrypt your data on this device.');
-            // Pre-fill email
-            document.getElementById('loginEmail').value = session.user.email;
-            document.getElementById('loginPassword').focus();
+            // Pre-fill email if element exists
+            const emailInput = document.getElementById('email');
+            if (emailInput && session.user.email) {
+                emailInput.value = session.user.email;
+            }
+            const passwordInput = document.getElementById('password');
+            if (passwordInput) {
+                passwordInput.focus();
+            }
             return;
         }
         

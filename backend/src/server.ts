@@ -27,7 +27,10 @@ const httpServer = createServer(app);
 
 // Allow both localhost and production frontend
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.FRONTEND_URL || 'https://your-app.vercel.app']
+  ? [
+      process.env.FRONTEND_URL || 'https://social-media-application-zeta.vercel.app',
+      'https://social-media-application-zeta.vercel.app' // Hardcoded fallback
+    ]
   : [
       'http://localhost:5173',
       'http://127.0.0.1:5173',
