@@ -161,7 +161,12 @@ class CryptoHelper {
      */
     async decryptChatKey(encryptedKeyBase64, chatId) {
         try {
+            console.log(`🔐 Attempting to decrypt chat key for chat ${chatId}`);
+            console.log(`   Private key available: ${!!this.privateKey}`);
+            console.log(`   Encrypted key length: ${encryptedKeyBase64.length} chars`);
+            
             const encryptedKey = Uint8Array.from(atob(encryptedKeyBase64), c => c.charCodeAt(0));
+            console.log(`   Decoded to ${encryptedKey.length} bytes`);
             
             const decrypted = await crypto.subtle.decrypt(
                 {
@@ -170,6 +175,7 @@ class CryptoHelper {
                 this.privateKey,
                 encryptedKey
             );
+            console.log(`   ✅ RSA decryption successful, ${decrypted.byteLength} bytes`);
 
             const chatKey = await crypto.subtle.importKey(
                 'raw',
@@ -180,6 +186,7 @@ class CryptoHelper {
                 true,
                 ['encrypt', 'decrypt']
             );
+            console.log(`   ✅ AES key imported successfully`);
 
             this.chatKeys.set(chatId, chatKey);
 
@@ -191,6 +198,9 @@ class CryptoHelper {
             return chatKey;
         } catch (error) {
             console.error('❌ Chat key decryption failed:', error);
+            console.error('   Error type:', error.name);
+            console.error('   Error message:', error.message);
+            console.error('   Stack:', error.stack);
             throw new Error('Failed to decrypt chat key. This usually happens when your encryption keys were regenerated. Please ask the sender to create a new chat.');
         }
     }
@@ -504,6 +514,47 @@ class CryptoHelper {
     }
 
     /**
+     * Clear master key from IndexedDB
+     */
+    async clearMasterKeyFromIndexedDB() {
+        return new Promise((resolve) => {
+            const request = indexedDB.open('EncryptionDB', 1);
+            
+            request.onsuccess = (e) => {
+                const db = e.target.result;
+                
+                if (!db.objectStoreNames.contains('keys')) {
+                    db.close();
+                    resolve();
+                    return;
+                }
+                
+                try {
+                    const tx = db.transaction(['keys'], 'readwrite');
+                    const store = tx.objectStore('keys');
+                    store.delete('masterKey');
+                    
+                    tx.oncomplete = () => {
+                        db.close();
+                        console.log('🗑️ Cleared master key from IndexedDB');
+                        resolve();
+                    };
+                    
+                    tx.onerror = () => {
+                        db.close();
+                        resolve();
+                    };
+                } catch (error) {
+                    db.close();
+                    resolve();
+                }
+            };
+            
+            request.onerror = () => resolve();
+        });
+    }
+
+    /**
      * Encrypt RSA private key with master key
      */
     async encryptRSAPrivateKey(rsaPrivateKey, masterKey) {
@@ -592,6 +643,21 @@ class CryptoHelper {
         } catch (error) {
             console.error('Failed to restore from recovery key:', error);
             throw new Error('Invalid recovery key');
+        }
+    }
+
+    /**
+     * Clear master key from IndexedDB (for corrupted accounts)
+     */
+    async clearMasterKey() {
+        try {
+            const db = await this.openDB();
+            const tx = db.transaction('keys', 'readwrite');
+            const store = tx.objectStore('keys');
+            await store.delete('masterKey');
+            console.log('Master key cleared from IndexedDB');
+        } catch (error) {
+            console.error('Failed to clear master key:', error);
         }
     }
 }
