@@ -25,11 +25,13 @@ dotenv.config();
 const app: Application = express();
 const httpServer = createServer(app);
 
-// Allow both localhost and 127.0.0.1 for development
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-];
+// Allow both localhost and production frontend
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [process.env.FRONTEND_URL || 'https://your-app.vercel.app']
+  : [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+    ];
 
 const io = new SocketIOServer(httpServer, {
   cors: {

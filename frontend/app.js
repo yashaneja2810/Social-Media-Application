@@ -1,8 +1,8 @@
 // Main Application Logic
 
-const BACKEND_URL = 'http://localhost:3000';
-const SUPABASE_URL = 'https://ethxvptzasiezviuvfwv.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0aHh2cHR6YXNpZXp2aXV2Znd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxOTg3NDIsImV4cCI6MjA4Mjc3NDc0Mn0.XikHP2O24anokFNxPs9Y1CNTbjn4xEnosVMs7KGZOSE';
+const BACKEND_URL = window.APP_CONFIG?.BACKEND_URL || 'http://localhost:3000';
+const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL || 'https://ethxvptzasiezviuvfwv.supabase.co';
+const SUPABASE_ANON_KEY = window.APP_CONFIG?.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0aHh2cHR6YXNpZXp2aXV2Znd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxOTg3NDIsImV4cCI6MjA4Mjc3NDc0Mn0.XikHP2O24anokFNxPs9Y1CNTbjn4xEnosVMs7KGZOSE';
 
 // Initialize Supabase client
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
