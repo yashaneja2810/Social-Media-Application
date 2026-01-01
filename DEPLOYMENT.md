@@ -52,7 +52,7 @@ RATE_LIMIT_MAX_REQUESTS=100
 
 Click **Create Web Service** and wait for deployment to complete.
 
-Your backend URL will be: `https://privacy-chat-backend.onrender.com` (or similar)
+Your backend URL will be: `https://social-media-application-7qzd.onrender.com`
 
 ---
 
@@ -65,7 +65,7 @@ After backend is deployed, update [frontend/config.js](frontend/config.js):
 ```javascript
 BACKEND_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000'
-    : 'https://your-actual-backend-url.onrender.com', // Replace with your Render URL
+    : 'https://social-media-application-7qzd.onrender.com',
 ```
 
 Commit and push:
@@ -87,14 +87,14 @@ git push origin main
    - **Output Directory**: `.` (current directory)
 5. Click **Deploy**
 
-Your frontend URL will be: `https://your-app.vercel.app`
+Your frontend URL will be: `https://social-media-application-zeta.vercel.app`
 
 ### Step 3: Update Backend CORS
 
 After Vercel deployment, update Render environment variable:
 
 ```
-FRONTEND_URL=https://your-actual-app.vercel.app
+FRONTEND_URL=https://social-media-application-zeta.vercel.app
 ```
 
 Then redeploy the backend in Render dashboard.
