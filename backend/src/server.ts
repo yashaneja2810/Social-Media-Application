@@ -36,6 +36,8 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
       'http://127.0.0.1:5173',
     ];
 
+logger.info(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
+
 const io = new SocketIOServer(httpServer, {
   cors: {
     origin: allowedOrigins,
@@ -47,8 +49,22 @@ const io = new SocketIOServer(httpServer, {
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      logger.warn(`Blocked CORS request from origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400, // 24 hours
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
