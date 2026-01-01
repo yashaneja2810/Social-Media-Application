@@ -25,20 +25,13 @@ dotenv.config();
 const app: Application = express();
 const httpServer = createServer(app);
 
-// Allow both localhost and production frontend
-// Always include production URL to ensure CORS works even if env var isn't set
+// CORS configuration - always allow production Vercel URL
 const productionUrl = 'https://social-media-application-zeta.vercel.app';
 const allowedOrigins: string[] = process.env.NODE_ENV === 'production'
-  ? [
-      productionUrl,
-      ...(process.env.FRONTEND_URL && process.env.FRONTEND_URL !== productionUrl ? [process.env.FRONTEND_URL] : [])
-    ]
-  : [
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-    ];
+  ? [productionUrl]
+  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
-logger.info(`Environment: NODE_ENV=${process.env.NODE_ENV}, FRONTEND_URL=${process.env.FRONTEND_URL}`);
+logger.info(`Environment: ${process.env.NODE_ENV}`);
 logger.info(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
 
 const io = new SocketIOServer(httpServer, {
@@ -52,22 +45,14 @@ const io = new SocketIOServer(httpServer, {
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      logger.warn(`Blocked CORS request from origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400, // 24 hours
+  maxAge: 86400,
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
